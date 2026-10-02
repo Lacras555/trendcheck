@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>TrendCheck</title>
-<meta name="description" content="Watchlist that reads SMA 20/50/100/200 and RSI to flag buy, hold or avoid.">
+<meta name="description" content="Watchlist that reads SMA 20/50/100/200, RSI and relative strength to flag buy, hold or avoid.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -23,8 +23,8 @@
   --bg:#eef1ee; --surface:#fbfcfb; --sunk:#e3e8e4; --line:#d3dad5; --fg:#121b17; --muted:#5c6a63; --faint:#8b9891;
   --accent:#2a44c4; --accent-ink:#ffffff;
   --strong:#0b7a43; --strong-bg:#d5efdf; --buy:#3c8f2f; --buy-bg:#e2f1d9;
-  --hold:#3d5a80; --hold-bg:#dde6f1; --watch:#9a6a00; --watch-bg:#f6ead0;
-  --wait:#b65312; --wait-bg:#f8e1d2; --avoid:#b42a2a; --avoid-bg:#f6d9d6;
+  --hold:#3d5a80; --hold-bg:#dde6f1; --watch:#8a6a00; --watch-bg:#f4ebcf;
+  --ext:#b65312; --ext-bg:#f8e1d2; --sell:#9b3d6a; --sell-bg:#f3dde8; --avoid:#b42a2a; --avoid-bg:#f6d9d6;
   --up:#0b7a43; --down:#b42a2a;
   --ma20:#2a6fdb; --ma50:#d08a00; --ma100:#8a4fd0; --ma200:#c4312f; --price:#121b17;
   --f-ui:"Archivo",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
@@ -37,7 +37,7 @@
   --accent:#7f95ff; --accent-ink:#0c1113;
   --strong:#43d18a; --strong-bg:#123a26; --buy:#8fd06b; --buy-bg:#203416;
   --hold:#8fb0db; --hold-bg:#1b2a3d; --watch:#e6b647; --watch-bg:#382c10;
-  --wait:#f39a5c; --wait-bg:#3d2414; --avoid:#f2736e; --avoid-bg:#401b1a;
+  --ext:#f39a5c; --ext-bg:#3d2414; --sell:#ec8fbc; --sell-bg:#3a1a2b; --avoid:#f2736e; --avoid-bg:#401b1a;
   --up:#43d18a; --down:#f2736e;
   --ma20:#5d9bff; --ma50:#f0b23a; --ma100:#b68cff; --ma200:#ff6b66; --price:#e4ebe8;
   color-scheme:dark;
@@ -47,7 +47,7 @@
   --accent:#7f95ff; --accent-ink:#0c1113;
   --strong:#43d18a; --strong-bg:#123a26; --buy:#8fd06b; --buy-bg:#203416;
   --hold:#8fb0db; --hold-bg:#1b2a3d; --watch:#e6b647; --watch-bg:#382c10;
-  --wait:#f39a5c; --wait-bg:#3d2414; --avoid:#f2736e; --avoid-bg:#401b1a;
+  --ext:#f39a5c; --ext-bg:#3d2414; --sell:#ec8fbc; --sell-bg:#3a1a2b; --avoid:#f2736e; --avoid-bg:#401b1a;
   --up:#43d18a; --down:#f2736e;
   --ma20:#5d9bff; --ma50:#f0b23a; --ma100:#b68cff; --ma200:#ff6b66; --price:#e4ebe8;
   color-scheme:dark;
@@ -61,18 +61,19 @@ button{cursor:pointer}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 [hidden]{display:none!important}
 
-/* ---------- header ---------- */
+/* header */
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 0;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:8px}
 .brand h1{margin:0;font-size:26px;font-weight:800;font-stretch:118%;letter-spacing:-.02em;line-height:1}
 .brand .stamp{margin-left:auto;font-size:12px;color:var(--muted);text-align:right;line-height:1.25}
-.iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none;padding:0}
+.iconbtn{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none;padding:0}
 .iconbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .iconbtn.spin svg{animation:spin 1s linear infinite}
+.iconbtn .on{position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--strong);border:2px solid var(--surface)}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .add{position:relative;margin-top:12px}
-.add input{width:100%;height:44px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);padding:0 44px 0 40px;font-size:16px;text-transform:uppercase}
+.add input{width:100%;height:44px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);padding:0 64px 0 40px;font-size:16px;text-transform:uppercase}
 .add input::placeholder{text-transform:none;color:var(--faint)}
 .add .lead{position:absolute;left:13px;top:13px;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
 .add .go{position:absolute;right:5px;top:5px;height:34px;padding:0 12px;border-radius:9px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px}
@@ -83,7 +84,7 @@ button{cursor:pointer}
 .sugg span{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .sugg em{font-style:normal;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
 
-.rail{display:flex;gap:6px;overflow-x:auto;padding:12px 0 10px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
+.rail{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 10px;scrollbar-width:none;margin:0 -16px}
 .rail::-webkit-scrollbar{display:none}
 .chip{flex:none;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .chip .n{font-family:var(--f-num);font-size:12px;color:var(--muted)}
@@ -91,10 +92,25 @@ button{cursor:pointer}
 .chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
 .chip i{width:8px;height:8px;border-radius:50%;display:block}
 
-.bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+/* market + changes strips */
+.strips{display:grid;gap:8px;padding:12px 16px 0}
+.mkt{display:flex;align-items:center;gap:10px;font-size:13px;padding:10px 12px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.mkt i{width:10px;height:10px;border-radius:50%;flex:none}
+.mkt b{font-weight:700}
+.mkt span{color:var(--muted)}
+.changes{padding:12px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);font-size:13px}
+.changes .h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.changes .h b{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.changes .h button{border:0;background:none;color:var(--accent);font-weight:700;font-size:13px;padding:2px 0}
+.changes ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.changes li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.changes li b{font-weight:800;font-stretch:115%;min-width:54px}
+.changes .arrow{color:var(--faint)}
+
+.bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
 .bar select{border:0;background:transparent;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fg);padding:4px 0;text-align:right}
 
-/* ---------- list ---------- */
+/* list */
 main{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
 .list{list-style:none;margin:0;padding:0 16px}
 .row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:13px 0;border-bottom:1px solid var(--line);width:100%;text-align:left;background:transparent;border-left:0;border-right:0;border-top:0}
@@ -103,57 +119,58 @@ main{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
 .tick b{font-size:19px;font-weight:800;font-stretch:122%;letter-spacing:-.01em}
 .tick .type{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;transform:translateY(-2px)}
 .tick .nm{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.newdot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;transform:translateY(-3px)}
 .px{text-align:right;font-size:16px;font-weight:600}
-.meta{display:flex;align-items:center;gap:10px;min-width:0}
+.meta{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap;row-gap:4px}
 .chg{text-align:right;font-size:13px;font-weight:500}
 .up{color:var(--up)} .down{color:var(--down)}
 
 .pill{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-stretch:108%;white-space:nowrap}
 .v-STRONG{color:var(--strong);background:var(--strong-bg)} .v-BUY{color:var(--buy);background:var(--buy-bg)}
 .v-HOLD{color:var(--hold);background:var(--hold-bg)} .v-WATCH{color:var(--watch);background:var(--watch-bg)}
-.v-WAIT{color:var(--wait);background:var(--wait-bg)} .v-AVOID{color:var(--avoid);background:var(--avoid-bg)}
+.v-EXTENDED{color:var(--ext);background:var(--ext-bg)} .v-SELLOFF{color:var(--sell);background:var(--sell-bg)}
+.v-AVOID{color:var(--avoid);background:var(--avoid-bg)}
 .v-NODATA,.v-ERROR,.v-LOAD{color:var(--muted);background:var(--sunk)}
-.dot-STRONG{background:var(--strong)} .dot-BUY{background:var(--buy)} .dot-HOLD{background:var(--hold)} .dot-WATCH{background:var(--watch)} .dot-WAIT{background:var(--wait)} .dot-AVOID{background:var(--avoid)}
+.dot-STRONG{background:var(--strong)} .dot-BUY{background:var(--buy)} .dot-HOLD{background:var(--hold)} .dot-WATCH{background:var(--watch)} .dot-EXTENDED{background:var(--ext)} .dot-SELLOFF{background:var(--sell)} .dot-AVOID{background:var(--avoid)}
 
 .rsi{font-size:12px;color:var(--muted);white-space:nowrap}
 .rsi b{color:var(--fg);font-weight:600}
-.rsi.hot b{color:var(--wait)} .rsi.cold b{color:var(--strong)}
-.stack{display:flex;gap:2px;align-items:center}
-.stack span{width:15px;height:15px;border-radius:3px;font-size:8px;font-family:var(--f-num);display:grid;place-items:center;font-weight:600;background:var(--sunk);color:var(--faint)}
-.stack span.on{background:var(--fg);color:var(--bg)}
+.rsi.hot b{color:var(--ext)} .rsi.cold b{color:var(--strong)}
+.lead-tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.lead-tag.y{color:var(--up)} .lead-tag.n{color:var(--faint)}
 
 .empty{padding:40px 16px;text-align:center;color:var(--muted)}
 .foot{padding:20px 16px 0;font-size:12px;color:var(--faint);line-height:1.5}
 .foot button{border:0;background:none;padding:0;color:var(--accent);font-weight:600;font-size:12px;text-decoration:underline;text-underline-offset:2px}
 
-/* ---------- sheet (detail / help) ---------- */
+/* sheets */
 .sheet{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);visibility:hidden}
 .sheet.open{transform:none;visibility:visible}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 .sheet-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .sheet-head h2{margin:0;font-size:20px;font-weight:800;font-stretch:122%}
 .sheet-head .sp{flex:1}
-.sheet-body{padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 36px);display:grid;gap:18px;max-width:640px;margin:0 auto}
+.sheet-body{padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 36px);display:grid;gap:16px;max-width:640px;margin:0 auto}
 
 .hero .nm{font-size:14px;color:var(--muted)}
 .hero .big{display:flex;align-items:baseline;gap:12px;margin-top:4px;flex-wrap:wrap}
 .hero .big .p{font-size:38px;font-weight:600;letter-spacing:-.03em}
 .hero .big .c{font-size:15px;font-weight:500}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
 .verdict{display:grid;gap:12px}
-.verdict .pill{height:30px;font-size:15px;padding:0 12px;justify-self:start}
+.verdict .top-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.verdict .pill{height:30px;font-size:15px;padding:0 12px}
+.verdict .since{font-size:12px;color:var(--muted)}
 .verdict p{margin:0;font-size:16px;line-height:1.4;text-wrap:pretty}
 .meters{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .meter label{display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
 .meter .track{height:6px;border-radius:3px;background:var(--sunk);margin-top:6px;overflow:hidden}
 .meter .fill{height:100%;border-radius:3px;background:var(--fg)}
 
-.sec-t{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin:0 0 8px}
-.ranges{display:flex;gap:4px;background:var(--sunk);padding:3px;border-radius:9px;margin-bottom:10px}
-.ranges button{flex:1;border:0;background:transparent;height:30px;border-radius:7px;font-size:13px;font-weight:700}
-.ranges button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
-.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;min-height:36px;align-content:flex-start;margin-bottom:6px}
+.sec-t{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
+.sec-t span{text-transform:none;letter-spacing:0;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;min-height:54px;align-content:flex-start;margin-bottom:6px}
 .legend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .legend i{width:10px;height:3px;border-radius:2px;display:block}
 .legend .d{width:100%;color:var(--muted);font-size:11px}
@@ -167,14 +184,25 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
 .mas td.r{text-align:right}
 .mas .tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 
-.gauge{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--strong-bg) 0 30%,var(--sunk) 30% 70%,var(--wait-bg) 70% 100%);margin:14px 0 6px}
+.gauge{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--strong-bg) 0 40%,var(--sunk) 40% 75%,var(--ext-bg) 75% 100%);margin:14px 0 6px}
 .gauge .mk{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--fg);transform:translateX(-50%)}
-.gauge-l{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);font-family:var(--f-num);position:relative}
-.gauge-l span:nth-child(2){position:absolute;left:30%;transform:translateX(-50%)}
-.gauge-l span:nth-child(3){position:absolute;left:70%;transform:translateX(-50%)}
-.rsi-big{display:flex;align-items:baseline;justify-content:space-between}
-.rsi-big b{font-size:28px;font-weight:600}
-.rsi-big span{font-size:13px;color:var(--muted)}
+.gauge-l{position:relative;height:14px;font-size:11px;color:var(--faint);font-family:var(--f-num)}
+.gauge-l span{position:absolute;transform:translateX(-50%)}
+.gauge-l span:first-child{transform:none} .gauge-l span:last-child{transform:translateX(-100%)}
+.big2{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.big2 b{font-size:28px;font-weight:600}
+.big2 span{font-size:13px;color:var(--muted);text-align:right}
+
+.cmp{display:grid;gap:8px;margin-top:10px}
+.cmp div{display:grid;grid-template-columns:96px 1fr 64px;gap:8px;align-items:center;font-size:13px}
+.cmp .track{height:8px;border-radius:4px;background:var(--sunk);position:relative;overflow:hidden}
+.cmp .fill{position:absolute;top:0;bottom:0;border-radius:4px}
+.cmp .val{text-align:right}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0;line-height:1.45}
+.txt{margin:0;font-size:14px;line-height:1.5}
+
+.kv{display:grid;grid-template-columns:1fr auto;gap:8px 12px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;text-align:right;font-weight:600}
 
 .checks{list-style:none;margin:0;padding:0}
 .checks li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:start}
@@ -189,23 +217,36 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
 .range52 .mk{position:absolute;top:-6px;width:4px;height:16px;border-radius:2px;background:var(--accent);transform:translateX(-50%)}
 .range52 .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
 
-.danger{border:1px solid var(--line);background:var(--surface);color:var(--avoid);height:46px;border-radius:var(--r);font-weight:700;width:100%}
+.btn{height:46px;border-radius:var(--r);font-weight:700;width:100%;border:1px solid var(--line);background:var(--surface)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--avoid)}
 .confirm{display:flex;gap:8px}
-.confirm button{flex:1;height:46px;border-radius:var(--r);font-weight:700;border:1px solid var(--line);background:var(--surface)}
+.confirm button{flex:1}
 .confirm .yes{background:var(--avoid);color:#fff;border-color:var(--avoid)}
 
 .help h3{font-size:17px;font-weight:800;font-stretch:112%;margin:0 0 6px}
-.help p,.help li{font-size:15px;line-height:1.5;color:var(--fg)}
+.help p,.help li{font-size:15px;line-height:1.5}
 .help p{margin:0 0 10px}
-.help ol,.help ul{margin:0 0 10px;padding-left:20px}
-.help .rule{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.help ul,.help ol{margin:0 0 10px;padding-left:20px}
+.help .rule{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
 .help .rule:last-child{border-bottom:0}
+.help .rule .pill{justify-self:start}
 .help .rule p{margin:0;font-size:14px}
 .help small{color:var(--muted);font-size:13px;line-height:1.5;display:block}
+.tblwrap{overflow-x:auto;margin:0 -14px;padding:0 14px}
+table.bt{width:100%;border-collapse:collapse;font-size:13px;min-width:330px}
+.bt th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;font-weight:700;padding:6px 0 6px 8px;border-bottom:1px solid var(--line)}
+.bt th:first-child,.bt td:first-child{text-align:left;padding-left:0}
+.bt td{padding:8px 0 8px 8px;border-bottom:1px solid var(--line);text-align:right}
+.bt tr:last-child td{border-bottom:0}
+
+.steps{margin:0;padding-left:20px;font-size:14px;line-height:1.6}
+.status{display:flex;align-items:center;gap:10px;font-weight:700}
+.status i{width:10px;height:10px;border-radius:50%;background:var(--faint)}
+.status.on i{background:var(--strong)}
 
 .toast{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:80;background:var(--fg);color:var(--bg);padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:600;box-shadow:0 10px 30px rgb(0 0 0 / .25);transform:translateY(calc(100% + 120px));visibility:hidden;transition:transform .25s ease,visibility .25s}
 .toast.show{transform:none;visibility:visible}
-
 .skel{height:14px;border-radius:4px;background:var(--sunk);width:80px}
 </style>
 </head>
@@ -214,6 +255,7 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
   <div class="brand">
     <h1>TrendCheck</h1>
     <div class="stamp" id="stamp">Loading…</div>
+    <button class="iconbtn" id="bell" aria-label="Alerts"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="on" id="bellOn" hidden></span></button>
     <button class="iconbtn" id="refresh" aria-label="Refresh prices"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
   <form class="add" id="addForm" autocomplete="off">
@@ -226,11 +268,15 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
 </header>
 
 <main>
+  <div class="strips">
+    <div class="mkt" id="mkt" hidden></div>
+    <div class="changes" id="changes" hidden></div>
+  </div>
   <div class="bar">
     <span id="count">Watchlist</span>
     <label>Sort <select id="sort" aria-label="Sort">
       <option value="signal">Best signal</option>
-      <option value="trend">Trend strength</option>
+      <option value="leaders">Leaders first</option>
       <option value="rsi">Lowest RSI</option>
       <option value="chg">Day change</option>
       <option value="az">A–Z</option>
@@ -239,7 +285,7 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
   <ul class="list" id="list"></ul>
   <div class="empty" id="empty" hidden>No tickers match this filter.</div>
   <div class="foot">
-    Signals apply fixed rules to daily closing prices: SMA 20, 50, 100, 200 and RSI 14. They describe trend and timing; they do not predict the future and are not financial advice.
+    Signals apply fixed rules to daily closes: SMA 20, 50, 100, 200, RSI 14, and 6-month strength against the S&amp;P 500. They describe trend and timing. They do not predict the future and are not financial advice.
     <br><button id="helpBtn" type="button">How the signals work</button> · <button id="resetBtn" type="button">Restore original list</button>
   </div>
 </main>
@@ -253,6 +299,14 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
   <div class="sheet-body" id="dBody"></div>
 </section>
 
+<section class="sheet" id="alerts" aria-modal="true" role="dialog" aria-labelledby="aTitle">
+  <div class="sheet-head">
+    <button class="iconbtn" data-close aria-label="Back"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <h2 id="aTitle">Alerts</h2>
+  </div>
+  <div class="sheet-body" id="aBody"></div>
+</section>
+
 <section class="sheet" id="help" aria-modal="true" role="dialog" aria-labelledby="hTitle">
   <div class="sheet-head">
     <button class="iconbtn" data-close aria-label="Back"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -260,32 +314,50 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
   </div>
   <div class="sheet-body help">
     <div class="card">
-      <h3>Two questions per ticker</h3>
-      <p><b>Is the trend up?</b> Read from where price sits against SMA 200, and whether SMA 50 is above SMA 200.</p>
-      <p style="margin:0"><b>Is now a good moment?</b> Read from RSI 14 and how far price has run from SMA 20 and SMA 50.</p>
+      <h3>Three questions per ticker</h3>
+      <p><b>Is the trend up?</b> Price against SMA 200, and SMA 50 against SMA 200.</p>
+      <p><b>Is now a good moment?</b> RSI 14 and how far price has run above SMA 50.</p>
+      <p style="margin:0"><b>Is it leading?</b> Its 6-month return minus the S&amp;P 500's.</p>
     </div>
     <div class="card">
-      <h3>The rules, in order</h3>
-      <div class="rule"><span class="pill v-AVOID">Avoid</span><p>Price below SMA 200 <i>and</i> SMA 50 below SMA 200. A low RSI here is not a bargain; downtrends stay oversold.</p></div>
-      <div class="rule"><span class="pill v-WAIT">Wait</span><p>RSI 70 or higher, or price more than 15% above SMA 50. The trend may be fine but you would be chasing.</p></div>
-      <div class="rule"><span class="pill v-STRONG">Strong buy</span><p>Price above SMA 200, SMA 50 above SMA 200, and RSI 40 or lower. A pullback inside an uptrend.</p></div>
-      <div class="rule"><span class="pill v-BUY">Buy</span><p>Same uptrend, RSI between 40 and 55.</p></div>
-      <div class="rule"><span class="pill v-HOLD">Hold</span><p>Same uptrend, RSI between 55 and 70. Trend is healthy but there is no discount.</p></div>
-      <div class="rule"><span class="pill v-WATCH">Watch</span><p>Mixed: price and SMA 50 disagree about SMA 200. Either an early recovery or a trend being tested.</p></div>
+      <h3>The signals</h3>
+      <div class="rule"><span class="pill v-STRONG">Strong buy</span><p>Price above SMA 200, SMA 50 above SMA 200, RSI under 40. A pullback inside an uptrend.</p></div>
+      <div class="rule"><span class="pill v-BUY">Buy</span><p>Same uptrend, RSI under 50, or under 55 when the ticker is beating the S&amp;P 500.</p></div>
+      <div class="rule"><span class="pill v-HOLD">Hold</span><p>Same uptrend, RSI 50 to 75. Healthy trend, no discount.</p></div>
+      <div class="rule"><span class="pill v-EXTENDED">Extended</span><p>RSI 75 or higher, or price more than 15% above SMA 50. Strong trend, bigger drops. Keep new buys small.</p></div>
+      <div class="rule"><span class="pill v-WATCH">Watch</span><p>Price and SMA 50 disagree about SMA 200. Early recovery or a trend being tested.</p></div>
+      <div class="rule"><span class="pill v-SELLOFF">Selloff</span><p>Downtrend while the S&amp;P 500 is also below its SMA 200. Falling with the market.</p></div>
+      <div class="rule"><span class="pill v-AVOID">Avoid</span><p>Downtrend while the S&amp;P 500 is above its SMA 200. Falling on its own.</p></div>
     </div>
     <div class="card">
-      <h3>Scores</h3>
-      <p><b>Trend</b> (0 to 100%): price above SMA 200 (25 pts), SMA 50 above SMA 200 (15), SMA 20 above SMA 50 (10), SMA 200 rising over 20 sessions (10).</p>
-      <p style="margin:0"><b>Entry</b> (0 to 100%): highest for RSI 30 to 40, lower as RSI climbs, zero at 70+. Bonus for sitting within 3% of SMA 20 or 50; penalty when stretched above SMA 50.</p>
+      <h3>How each signal has done</h3>
+      <p>Backtest of these rules on the original 19 tickers, Oct 2011 to Sep 2026 (55,000 ticker-days). Return 20 trading days later.</p>
+      <div class="tblwrap"><table class="bt">
+        <tr><th>Signal</th><th>Avg</th><th>Up</th><th>Worst drop*</th></tr>
+        <tr><td><span class="pill v-STRONG">Strong buy</span></td><td class="num">+3.99%</td><td class="num">73%</td><td class="num">−5.9%</td></tr>
+        <tr><td><span class="pill v-BUY">Buy</span></td><td class="num">+2.66%</td><td class="num">65%</td><td class="num">−6.8%</td></tr>
+        <tr><td><span class="pill v-HOLD">Hold</span></td><td class="num">+1.53%</td><td class="num">64%</td><td class="num">−5.5%</td></tr>
+        <tr><td><span class="pill v-EXTENDED">Extended</span></td><td class="num">+4.38%</td><td class="num">62%</td><td class="num">−9.0%</td></tr>
+        <tr><td><span class="pill v-WATCH">Watch</span></td><td class="num">+1.65%</td><td class="num">59%</td><td class="num">−8.3%</td></tr>
+        <tr><td><span class="pill v-SELLOFF">Selloff</span></td><td class="num">+3.06%</td><td class="num">63%</td><td class="num">−9.1%</td></tr>
+        <tr><td><span class="pill v-AVOID">Avoid</span></td><td class="num">0.00%</td><td class="num">50%</td><td class="num">−11.6%</td></tr>
+        <tr><td>Any day</td><td class="num">+2.07%</td><td class="num">64%</td><td class="num">−7.5%</td></tr>
+      </table></div>
+      <small>*Average of the deepest drop in the following 60 trading days. Extended's high average comes mostly from NVDA, AMD and MSTR; without them it is close to average. The list was chosen in 2026, after many of these stocks had already done well, so treat the numbers as a ranking between signals, not a forecast.</small>
+    </div>
+    <div class="card">
+      <h3>Chart and prices</h3>
+      <p style="margin:0">The chart is fixed at one year of daily candles. Every indicator uses daily closes, the same basis as a standard daily chart and the GOOGLEFINANCE formulas in your spreadsheet. During market hours today's candle uses the live price, so signals settle at the 4:00 PM close.</p>
     </div>
     <div class="card">
       <h3>Where the rules come from</h3>
       <ul>
-        <li>RSI and the 70/30 levels: J. Welles Wilder, <i>New Concepts in Technical Trading Systems</i> (1978).</li>
-        <li>Buying low RSI only when price is above SMA 200: Larry Connors and Cesar Alvarez, <i>Short Term Trading Strategies That Work</i> (2008).</li>
-        <li>The long moving average as a trend filter: Mebane Faber, "A Quantitative Approach to Tactical Asset Allocation," <i>Journal of Wealth Management</i> (2007).</li>
+        <li>RSI: J. Welles Wilder, <i>New Concepts in Technical Trading Systems</i> (1978).</li>
+        <li>Buying low RSI only above SMA 200: Connors and Alvarez, <i>Short Term Trading Strategies That Work</i> (2008).</li>
+        <li>SMA 200 as a trend filter: Faber, "A Quantitative Approach to Tactical Asset Allocation" (2007).</li>
+        <li>Leaders keep leading: Jegadeesh and Titman, "Returns to Buying Winners and Selling Losers," <i>Journal of Finance</i> (1993).</li>
       </ul>
-      <small>Prices come from Yahoo Finance daily closes, refreshed every 5 minutes while the market is open. SMA values match the GOOGLEFINANCE formulas in your spreadsheet (average of the last N daily closes).</small>
+      <small>Prices: Yahoo Finance daily data, refreshed every 5 minutes while the app is open.</small>
     </div>
   </div>
 </section>
@@ -296,11 +368,14 @@ table.mas{width:100%;border-collapse:collapse;font-size:14px}
 <script>
 (function(){
 'use strict';
-const DEFAULTS = ['JEPQ','SPYM','QQQM','NVDA','AMD','GOOGL','AAPL','MSTR','GPIQ','SMH','SCHD','MSFT','DIA','SCHG','CHAT','SPMO','RSP','REMX','NFLX'];
-const RANK = {STRONG:0,BUY:1,HOLD:2,WATCH:3,WAIT:4,AVOID:5,NODATA:6,ERROR:7,LOAD:8};
-const FILTERS = [['ALL','All'],['STRONG','Strong buy'],['BUY','Buy'],['HOLD','Hold'],['WATCH','Watch'],['WAIT','Wait'],['AVOID','Avoid']];
-const TTL = 5*60*1000;
 const API = 'https://qxhaydjbiddbgekidtfe.supabase.co/functions/v1/trendcheck';
+const VAPID = 'BNVxczW1Xt76A5OlHlvSfoxIPfa8frnOKJQmnydFNsz-9jUgnldA6b22d_js7FtiRntJzhC9EmQCqztfC2CiTCA';
+const DEFAULTS = ['JEPQ','SPYM','QQQM','NVDA','AMD','GOOGL','AAPL','MSTR','GPIQ','SMH','SCHD','MSFT','DIA','SCHG','CHAT','SPMO','RSP','REMX','NFLX'];
+const FILTERS = [['ALL','All'],['STRONG','Strong buy'],['BUY','Buy'],['HOLD','Hold'],['EXTENDED','Extended'],['WATCH','Watch'],['SELLOFF','Selloff'],['AVOID','Avoid']];
+const RANK = Object.assign({ERROR:8, LOAD:9}, TC.RANK);
+const L = TC.LABELS;
+const TTL = 5*60*1000;
+const CHART_N = 252;   // fixed: 1 year of daily candles
 const $ = s => document.querySelector(s);
 
 const store = {
@@ -308,73 +383,130 @@ const store = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
 let watch = store.get('tc.watch', null) || DEFAULTS.slice();
-let cache = store.get('tc.cache', {});         // symbol -> {data, at}
+let cache = store.get('tc.cache2', {});          // symbol -> {data, at}
+let seen = store.get('tc.seen', null);           // symbol -> verdict at last "Got it"
 let filter = store.get('tc.filter', 'ALL');
 let sortBy = store.get('tc.sort', 'signal');
-let range = store.get('tc.range', 126);
-const state = {};                               // symbol -> {data, a, status, err}
-let openSym = null;
+try{ localStorage.removeItem('tc.cache'); localStorage.removeItem('tc.range'); }catch(e){}
+const state = {};
+let mkt = null, openSym = null;
 
+function analyzeSym(sym){
+  const d = state[sym] && state[sym].data; if (!d) return;
+  try { state[sym].a = TC.analyze(d.t, d.c, mkt); state[sym].status = 'ok'; }
+  catch(e){ state[sym].status = 'err'; state[sym].err = 'Could not read this ticker'; }
+}
 function hydrate(sym){
   const c = cache[sym];
-  if (c && c.data) { state[sym] = { data:c.data, a:TC.analyze(c.data.c), status:'ok', at:c.at }; }
+  if (c && c.data) { state[sym] = { data:c.data, at:c.at }; analyzeSym(sym); }
   else if (!state[sym]) state[sym] = { status:'load' };
 }
+function setMarket(){
+  const c = cache.SPY; mkt = c && c.data ? TC.marketContext(c.data) : null;
+}
+setMarket();
 watch.forEach(hydrate);
 
-/* ---------- formatting ---------- */
+/* formatting */
 const money = (v, cur) => v == null ? '—' : (cur && cur !== 'USD' ? '' : '$') + v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:v<1?4:2});
 const fx = (v, d=2) => v == null ? '—' : v.toFixed(d);
 const sgn = (v, d=2) => v == null ? '—' : (v>=0?'+':'') + v.toFixed(d) + '%';
+const pts = v => v == null ? '—' : (v>=0?'+':'') + (v*100).toFixed(1) + ' pts';
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dshort = ts => new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'});
 function ago(ts){
   if (!ts) return '';
   const m = Math.round((Date.now()-ts)/60000);
   if (m < 1) return 'just now'; if (m < 60) return m + ' min ago';
   const h = Math.round(m/60); return h < 24 ? h + ' h ago' : new Date(ts).toLocaleDateString();
 }
-function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2800); }
 
-/* ---------- data ---------- */
+/* data */
+async function getJSON(sym){
+  const r = await fetch(API + '?symbol=' + encodeURIComponent(sym), {cache:'no-store'});
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Could not load ' + sym);
+  return j;
+}
+async function fetchSpy(force){
+  const c = cache.SPY;
+  if (!force && c && Date.now()-c.at < TTL) return false;
+  try { cache.SPY = { data: await getJSON('SPY'), at: Date.now() }; setMarket(); return true; }
+  catch(e){ return false; }
+}
 async function fetchOne(sym, force){
   const c = cache[sym];
   if (!force && c && Date.now()-c.at < TTL) { hydrate(sym); return; }
   try{
-    const r = await fetch(API + '?symbol=' + encodeURIComponent(sym), {cache:'no-store'});
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error || 'Could not load ' + sym);
+    const j = await getJSON(sym);
     cache[sym] = { data:j, at:Date.now() };
-    state[sym] = { data:j, a:TC.analyze(j.c), status:'ok', at:Date.now() };
+    state[sym] = { data:j, at:Date.now() }; analyzeSym(sym);
   }catch(e){
-    if (state[sym] && state[sym].data) { state[sym].stale = true; }
+    if (state[sym] && state[sym].data) state[sym].stale = true;
     else state[sym] = { status:'err', err:e.message };
     throw e;
   }
 }
+function saveCache(){
+  const out = {}; watch.forEach(s => { if (cache[s]) out[s] = cache[s]; }); if (cache.SPY) out.SPY = cache.SPY;
+  cache = out; store.set('tc.cache2', out);
+}
+let refreshing = false;
 async function refreshAll(force){
+  if (refreshing) return; refreshing = true;
   const btn = $('#refresh'); btn.classList.add('spin'); btn.disabled = true;
+  const spyChanged = await fetchSpy(force);
+  if (spyChanged) watch.forEach(s => { if (state[s] && state[s].data) analyzeSym(s); });
   const queue = watch.slice(); let fails = 0;
   async function worker(){ while(queue.length){ const s = queue.shift(); try{ await fetchOne(s, force); }catch(e){ fails++; } render(); } }
-  await Promise.all(Array.from({length:6}, worker));
-  store.set('tc.cache', pruneCache());
-  btn.classList.remove('spin'); btn.disabled = false;
-  render();
+  await Promise.all(Array.from({length:5}, worker));
+  saveCache();
+  btn.classList.remove('spin'); btn.disabled = false; refreshing = false;
+  updateSeen(); render(); syncAlerts();
   if (fails) toast(fails === 1 ? '1 ticker could not be refreshed.' : fails + ' tickers could not be refreshed.');
 }
-function pruneCache(){ const out = {}; watch.forEach(s => { if (cache[s]) out[s] = cache[s]; }); cache = out; return out; }
+function verdictOf(s){ const st = state[s]; if (!st || st.status==='load' || (!st.a && st.status!=='err')) return 'LOAD'; if (st.status==='err') return 'ERROR'; return st.a.verdict; }
+function currentVerdicts(){ const o = {}; watch.forEach(s => { const v = verdictOf(s); if (L[v] && v !== 'NODATA') o[s] = v; }); return o; }
 
-/* ---------- list ---------- */
-function verdictOf(s){ const st = state[s]; if (!st || st.status==='load') return 'LOAD'; if (st.status==='err') return 'ERROR'; return st.a.verdict; }
+/* changes since last check */
+function updateSeen(){
+  const cur = currentVerdicts();
+  if (!seen) { seen = cur; store.set('tc.seen', seen); return; }
+  let dirty = false;
+  Object.keys(cur).forEach(s => { if (!seen[s]) { seen[s] = cur[s]; dirty = true; } });
+  if (dirty) store.set('tc.seen', seen);
+}
+function renderChanges(){
+  const box = $('#changes'); if (!seen) { box.hidden = true; return; }
+  const cur = currentVerdicts();
+  const ch = Object.keys(cur).filter(s => seen[s] && seen[s] !== cur[s]).sort((a,b) => RANK[cur[a]] - RANK[cur[b]]);
+  if (!ch.length) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = `<div class="h"><b>Changed since your last check</b><button type="button" id="gotIt">Got it</button></div>
+    <ul>${ch.slice(0,8).map(s => `<li><b>${esc(s)}</b><span class="pill v-${seen[s]}">${L[seen[s]]}</span><span class="arrow">→</span><span class="pill v-${cur[s]}">${L[cur[s]]}</span></li>`).join('')}</ul>
+    ${ch.length>8?`<p class="note">+${ch.length-8} more</p>`:''}`;
+}
+
+/* list */
 function render(){
   const counts = {ALL:watch.length}; watch.forEach(s => { const v = verdictOf(s); counts[v] = (counts[v]||0)+1; });
   $('#rail').innerHTML = FILTERS.map(([k,l]) =>
     `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter===k}">${k!=='ALL'?`<i class="dot-${k}"></i>`:''}${l}<span class="n">${counts[k]||0}</span></button>`).join('');
 
-  let rows = watch.filter(s => filter==='ALL' || verdictOf(s)===filter);
+  if (mkt) {
+    const m = mkt.now, el = $('#mkt'); el.hidden = false;
+    el.innerHTML = m.up
+      ? `<i class="dot-STRONG"></i><div><b>Market uptrend.</b> <span>S&amp;P 500 is ${fx(m.d200,1)}% above its SMA 200, RSI ${fx(m.rsi,0)}.</span></div>`
+      : `<i class="dot-AVOID"></i><div><b>Market downtrend.</b> <span>S&amp;P 500 is ${fx(Math.abs(m.d200),1)}% below its SMA 200. Buy signals carry deeper drops.</span></div>`;
+  }
+  renderChanges();
+
+  const rows = watch.filter(s => filter==='ALL' || verdictOf(s)===filter);
   const A = s => state[s] && state[s].a, D = s => state[s] && state[s].data;
   const by = {
     signal:(x,y)=> RANK[verdictOf(x)]-RANK[verdictOf(y)] || ((A(y)?.score??-1)-(A(x)?.score??-1)),
-    trend:(x,y)=> (A(y)?.trend??-1)-(A(x)?.trend??-1) || RANK[verdictOf(x)]-RANK[verdictOf(y)],
+    leaders:(x,y)=> (A(y)?.ind.rs??-9)-(A(x)?.ind.rs??-9),
     rsi:(x,y)=> (A(x)?.ind.rsi??999)-(A(y)?.ind.rsi??999),
     chg:(x,y)=> (D(y)?.changePct??-999)-(D(x)?.changePct??-999),
     az:(x,y)=> x.localeCompare(y)
@@ -391,51 +523,90 @@ function render(){
 }
 function rowHTML(s){
   const st = state[s] || {status:'load'};
-  if (st.status !== 'ok') {
+  if (st.status !== 'ok' || !st.a) {
+    const err = st.status === 'err';
     return `<li><button class="row" type="button" data-s="${esc(s)}">
-      <div class="tick"><b>${esc(s)}</b></div><div class="px">${st.status==='err'?'':'<div class="skel"></div>'}</div>
-      <div class="meta"><span class="pill ${st.status==='err'?'v-ERROR':'v-LOAD'}">${st.status==='err'?'No data':'Loading'}</span>${st.status==='err'?`<span class="rsi">${esc(st.err||'')}</span>`:''}</div><div></div></button></li>`;
+      <div class="tick"><b>${esc(s)}</b></div><div class="px">${err?'':'<div class="skel"></div>'}</div>
+      <div class="meta"><span class="pill ${err?'v-ERROR':'v-LOAD'}">${err?'No data':'Loading'}</span>${err?`<span class="rsi">${esc(st.err||'')}</span>`:''}</div><div></div></button></li>`;
   }
-  const d = st.data, a = st.a, i = a.ind;
-  const ch = d.changePct;
-  const stack = [['20',i.s20],['50',i.s50],['100',i.s100],['200',i.s200]].map(([l,v]) => `<span class="${v!=null&&i.price>v?'on':''}" title="Price ${i.price>v?'above':'below'} SMA ${l}">${l}</span>`).join('');
-  const rc = i.rsi>=70?'hot':i.rsi<=30?'cold':'';
+  const d = st.data, a = st.a, i = a.ind, ch = d.changePct;
+  const rc = i.rsi>=75?'hot':i.rsi<40?'cold':'';
+  const fresh = a.since && a.since.sessions <= 3 && a.verdict !== 'NODATA';
+  const lt = a.leader == null ? '' : a.leader ? `<span class="lead-tag y">▲ Leader</span>` : `<span class="lead-tag n">▼ Laggard</span>`;
   return `<li><button class="row" type="button" data-s="${esc(s)}" aria-label="${esc(s)}, ${a.label}">
-    <div class="tick"><b>${esc(d.symbol)}</b><span class="type">${esc(d.type)}</span><span class="nm">${esc(d.name)}</span></div>
+    <div class="tick"><b>${esc(d.symbol)}</b>${fresh?'<span class="newdot" title="New signal"></span>':''}<span class="type">${esc(d.type)}</span><span class="nm">${esc(d.name)}</span></div>
     <div class="px num">${money(d.price,d.currency)}</div>
-    <div class="meta"><span class="pill v-${a.verdict}">${a.label}</span><span class="rsi ${rc}">RSI <b class="num">${fx(i.rsi,0)}</b></span><span class="stack" aria-label="${a.aboveCount} of 4 averages below price">${stack}</span></div>
+    <div class="meta"><span class="pill v-${a.verdict}">${a.label}</span><span class="rsi ${rc}">RSI <b class="num">${fx(i.rsi,0)}</b></span>${lt}</div>
     <div class="chg num ${ch>=0?'up':'down'}">${sgn(ch)}</div>
   </button></li>`;
 }
 
-/* ---------- detail ---------- */
+/* detail */
 function openDetail(s){ openSym = s; $('#detail').classList.add('open'); $('#detail').scrollTop = 0; renderDetail(true); history.pushState({d:s}, ''); }
 function closeSheets(){ document.querySelectorAll('.sheet.open').forEach(el => el.classList.remove('open')); openSym = null; }
+
+function duplicatesOf(s){
+  const me = state[s] && state[s].data; if (!me) return [];
+  const out = [];
+  watch.forEach(o => { if (o === s || !state[o] || !state[o].data) return; const r = TC.correlation(me, state[o].data); if (r != null && r >= 0.9) out.push([o, r]); });
+  return out.sort((a,b) => b[1]-a[1]).slice(0,4);
+}
 
 function renderDetail(full){
   const s = openSym, st = state[s];
   $('#dTitle').textContent = s;
   const body = $('#dBody');
-  if (!st || st.status !== 'ok') {
+  if (!st || st.status !== 'ok' || !st.a) {
     body.innerHTML = `<div class="card">${st&&st.status==='err' ? esc(st.err) : 'Loading prices…'}</div>` + removeHTML();
-    return;
+    body.dataset.sym = ''; return;
   }
   const d = st.data, a = st.a, i = a.ind;
   if (!full && body.dataset.sym === s && body.dataset.at == st.at) return;
   body.dataset.sym = s; body.dataset.at = st.at;
   const maRows = [['SMA 20','--ma20',i.s20,i.d20],['SMA 50','--ma50',i.s50,i.d50],['SMA 100','--ma100',i.s100,i.d100],['SMA 200','--ma200',i.s200,i.d200]]
     .map(([n,c,v,dd]) => `<tr><td><i style="background:var(${c})"></i>${n}</td><td class="r num">${money(v,d.currency)}</td><td class="r num ${dd>=0?'up':'down'}">${sgn(dd,1)}</td><td class="r"><span class="tag ${dd>=0?'up':'down'}">${dd>=0?'Above':'Below'}</span></td></tr>`).join('');
-  const rsiTxt = i.rsi>=70?'Overbought':i.rsi<=30?'Oversold':i.rsi<=40?'Pullback zone':i.rsi<=55?'Neutral':'Firm momentum';
+  const rsiTxt = i.rsi>=75?'Very high':i.rsi>=70?'Overbought zone':i.rsi<30?'Oversold':i.rsi<40?'Pullback zone':i.rsi<50?'Below neutral':'Firm momentum';
   const trendPct = a.trend!=null ? Math.round(a.trend/60*100) : 0, entryPct = a.timing!=null ? Math.round(a.timing/40*100) : 0;
   const r52 = (d.high52 && d.low52 && d.high52>d.low52) ? Math.min(100,Math.max(0,(d.price-d.low52)/(d.high52-d.low52)*100)) : null;
   const offHigh = d.high52 ? (d.price/d.high52-1)*100 : null;
+  const sinceTxt = a.since ? `Since ${dshort(a.since.ts)} · ${a.since.sessions} session${a.since.sessions===1?'':'s'}${a.prevVerdict&&L[a.prevVerdict]?` · was ${L[a.prevVerdict]}`:''}` : '';
+
+  let rec = '';
+  if (a.record) {
+    const R = a.record, mx = Math.max(Math.abs(R.avg), Math.abs(R.base), 1);
+    const bar = (v, cls) => `<div class="track"><div class="fill" style="left:0;width:${Math.abs(v)/mx*100}%;background:var(${v>=0?'--up':'--down'});${cls?'opacity:.45':''}"></div></div>`;
+    const yr = new Date(d.t[200]*1000).getFullYear();
+    rec = `<div class="card"><p class="sec-t">This signal on ${esc(s)}<span>since ${yr}</span></p>
+      <p class="txt"><b>${a.label}</b> appeared on ${R.n} trading days. Twenty sessions later the price was up ${fx(R.win,0)}% of the time.</p>
+      <div class="cmp">
+        <div><span>${a.label}</span>${bar(R.avg)}<span class="val num ${R.avg>=0?'up':'down'}">${sgn(R.avg,1)}</span></div>
+        <div><span>Any day</span>${bar(R.base,1)}<span class="val num">${sgn(R.base,1)}</span></div>
+      </div>
+      <p class="note">Average return 20 sessions after the signal, from daily closes. Past behavior, not a promise.</p></div>`;
+  }
+
+  let risk = '';
+  if (i.vol && mkt && mkt.now.vol) {
+    const ratio = i.vol / mkt.now.vol, amt = Math.round(1000/ratio/10)*10;
+    risk = `<div class="card"><p class="sec-t">Strength and risk</p><dl class="kv">
+      <dt>6 months vs S&amp;P 500</dt><dd class="num ${i.rs>=0?'up':'down'}">${pts(i.rs)} ${i.rs!=null?(i.rs>0?'· Leader':'· Laggard'):''}</dd>
+      <dt>Daily swings (yearly rate)</dt><dd class="num">${fx(i.vol*100,0)}% vs ${fx(mkt.now.vol*100,0)}%</dd>
+      <dt>Risk vs S&amp;P 500</dt><dd class="num">${fx(ratio,1)}×</dd></dl>
+      <p class="note">For the same risk as $1,000 in the S&amp;P 500, a position here would be about <b>$${amt.toLocaleString()}</b>.</p></div>`;
+  }
+
+  const dups = duplicatesOf(s);
+  const dupCard = dups.length ? `<div class="card"><p class="sec-t">Moves almost the same as</p>
+      <p class="txt">${dups.map(([o,r]) => `<b>${esc(o)}</b> <span class="num">${r.toFixed(2)}</span>`).join(' · ')}</p>
+      <p class="note">Correlation of daily moves over the past year (1.00 = identical). Buying both adds the same bet twice.</p></div>` : '';
+
   body.innerHTML = `
     <div class="hero">
       <div class="nm">${esc(d.name)} · ${esc(d.type)}${d.exchange?' · '+esc(d.exchange):''}</div>
       <div class="big"><span class="p num">${money(d.price,d.currency)}</span><span class="c num ${d.changePct>=0?'up':'down'}">${sgn(d.changePct)} today</span></div>
     </div>
     <div class="card verdict">
-      <span class="pill v-${a.verdict}">${a.label}</span>
+      <div class="top-row"><span class="pill v-${a.verdict}">${a.label}</span><span class="since">${sinceTxt}</span></div>
       <p>${esc(a.headline)}</p>
       ${a.verdict!=='NODATA'?`<div class="meters">
         <div class="meter"><label>Trend <span class="num">${trendPct}%</span></label><div class="track"><div class="fill" style="width:${trendPct}%"></div></div></div>
@@ -443,89 +614,92 @@ function renderDetail(full){
       </div>`:''}
     </div>
     <div>
-      <p class="sec-t">Price and moving averages</p>
-      <div class="ranges" id="ranges">${[[63,'3M'],[126,'6M'],[252,'1Y'],[500,'2Y']].map(([n,l])=>`<button type="button" data-r="${n}" aria-pressed="${range==n}">${l}</button>`).join('')}</div>
+      <p class="sec-t">Price · 1 year · daily candles</p>
       <div class="legend" id="legend"></div>
-      <canvas id="chart" height="300" aria-label="Price chart with moving averages and RSI"></canvas>
+      <canvas id="chart" aria-label="One-year daily candle chart with moving averages and RSI"></canvas>
     </div>
-    <div class="card">
-      <p class="sec-t">Moving averages</p>
-      <table class="mas">${maRows}</table>
-    </div>
+    <div class="card"><p class="sec-t">Moving averages</p><table class="mas">${maRows}</table></div>
     <div class="card">
       <p class="sec-t">RSI 14</p>
-      <div class="rsi-big"><b class="num">${fx(i.rsi,1)}</b><span>${rsiTxt}</span></div>
+      <div class="big2"><b class="num">${fx(i.rsi,1)}</b><span>${rsiTxt}</span></div>
       <div class="gauge"><div class="mk" style="left:${Math.min(100,Math.max(0,i.rsi))}%"></div></div>
-      <div class="gauge-l"><span>0</span><span>30</span><span>70</span><span>100</span></div>
+      <div class="gauge-l"><span style="left:0">0</span><span style="left:40%">40</span><span style="left:75%">75</span><span style="left:100%">100</span></div>
     </div>
-    ${a.checks.length?`<div class="card"><p class="sec-t">Checklist · ${a.checks.filter(c=>c.ok).length} of ${a.checks.length}</p><ul class="checks">${a.checks.map(c=>`<li class="${c.ok?'ok':'no'}"><span class="ic">${c.ok?'✓':'–'}</span><div><div class="t">${esc(c.label)}</div><div class="w">${esc(c.why)}</div></div></li>`).join('')}</ul></div>`:''}
-    ${r52!=null?`<div class="card range52"><p class="sec-t">52-week range · ${offHigh!=null?sgn(offHigh,1)+' from high':''}</p><div class="track"><div class="mk" style="left:${r52}%"></div></div><div class="ends num"><span>${money(d.low52,d.currency)}</span><span>${money(d.high52,d.currency)}</span></div></div>`:''}
+    ${rec}${risk}${dupCard}
+    ${a.checks.length?`<div class="card"><p class="sec-t">Checklist<span>${a.checks.filter(c=>c.ok).length} of ${a.checks.length}</span></p><ul class="checks">${a.checks.map(c=>`<li class="${c.ok?'ok':'no'}"><span class="ic">${c.ok?'✓':'–'}</span><div><div class="t">${esc(c.label)}</div><div class="w">${esc(c.why)}</div></div></li>`).join('')}</ul></div>`:''}
+    ${r52!=null?`<div class="card range52"><p class="sec-t">52-week range<span>${offHigh!=null?sgn(offHigh,1)+' from high':''}</span></p><div class="track"><div class="mk" style="left:${r52}%"></div></div><div class="ends num"><span>${money(d.low52,d.currency)}</span><span>${money(d.high52,d.currency)}</span></div></div>`:''}
     ${removeHTML()}
-    <div class="foot" style="padding:0">Last price ${d.marketTime?new Date(d.marketTime*1000).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''}. Daily closes from Yahoo Finance.</div>`;
-  requestAnimationFrame(drawChart);
+    <div class="foot" style="padding:0">Last price ${d.marketTime?new Date(d.marketTime*1000).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''}. Daily data from Yahoo Finance.</div>`;
+  requestAnimationFrame(() => drawChart());
 }
-function removeHTML(){ return `<div id="rmWrap"><button class="danger" type="button" id="rmBtn">Remove from watchlist</button></div>`; }
+function removeHTML(){ return `<div id="rmWrap"><button class="btn danger" type="button" id="rmBtn">Remove from watchlist</button></div>`; }
 
-/* ---------- chart ---------- */
-let chartGeom = null;
+/* chart: fixed 1-year daily candles + SMA 20/50/100/200 + RSI */
 function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 function drawChart(hover){
-  const cv = $('#chart'); if (!cv || !openSym || !state[openSym] || state[openSym].status!=='ok') return;
-  const d = state[openSym].data, c = d.c, t = d.t;
-  const n = Math.min(range, c.length);
-  const start = c.length - n;
-  if (!drawChart.cacheKey || drawChart.cacheKey !== openSym + d.t.length + c[c.length-1]) {
-    drawChart.series = { s20:TC.smaSeries(c,20), s50:TC.smaSeries(c,50), s100:TC.smaSeries(c,100), s200:TC.smaSeries(c,200), rsi:TC.rsiSeries(c,14) };
-    drawChart.cacheKey = openSym + d.t.length + c[c.length-1];
-  }
-  const S = drawChart.series;
+  const cv = $('#chart'); if (!cv || !openSym || !state[openSym] || !state[openSym].a) return;
+  const d = state[openSym].data, c = d.c, t = d.t, S = state[openSym].a.S, O = d.ohlc || null;
+  const N = c.length, start = Math.max(0, N - CHART_N, O ? O.from : 0), n = N - start;
+  const bar = k => {
+    if (O && k >= O.from) { const j = k - O.from; return { o:O.o[j], h:O.h[j], l:O.l[j], c:c[k] }; }
+    return { o:c[k-1] ?? c[k], h:Math.max(c[k], c[k-1] ?? c[k]), l:Math.min(c[k], c[k-1] ?? c[k]), c:c[k] };
+  };
   const dpr = window.devicePixelRatio || 1;
-  const W = cv.clientWidth, H = 300;
+  const W = cv.clientWidth, H = 330;
   cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
   const g = cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
-  const padR = 52, padL = 2, topH = 200, gap = 18, rsiTop = topH+gap, rsiH = H - rsiTop - 16;
+  const padR = 54, padL = 2, topH = 228, gap = 16, rsiTop = topH+gap, rsiH = H - rsiTop - 18;
   const keys = ['s20','s50','s100','s200'];
   let lo = Infinity, hi = -Infinity;
-  for (let k=start;k<c.length;k++){ lo=Math.min(lo,c[k]); hi=Math.max(hi,c[k]); keys.forEach(kk=>{ const v=S[kk][k]; if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);} }); }
-  const span = hi-lo || 1; lo -= span*.06; hi += span*.06;
-  const X = k => padL + (k-start)/(n-1)*(W-padL-padR);
+  for (let k=start;k<N;k++){ const b = bar(k); lo=Math.min(lo,b.l); hi=Math.max(hi,b.h); keys.forEach(kk=>{ const v=S[kk][k]; if(v!=null){lo=Math.min(lo,v);hi=Math.max(hi,v);} }); }
+  const span = hi-lo || 1; lo -= span*.05; hi += span*.05;
+  const plotW = W-padL-padR, step = plotW / n;
+  const X = k => padL + (k-start+0.5)*step;
   const Y = v => 6 + (hi-v)/(hi-lo)*(topH-12);
   const RY = v => rsiTop + (100-v)/100*rsiH;
   const line = cssVar('--line'), muted = cssVar('--faint');
   g.font = '500 10px "JetBrains Mono", ui-monospace, monospace'; g.textBaseline = 'middle';
-  // price grid
-  const step = niceStep((hi-lo)/4);
+  const gs = niceStep((hi-lo)/4);
   g.strokeStyle = line; g.fillStyle = muted; g.lineWidth = 1;
-  for (let v=Math.ceil(lo/step)*step; v<=hi; v+=step){ const y=Math.round(Y(v))+.5; g.beginPath(); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke(); g.fillText(fmtAxis(v), W-padR+6, y); }
-  // MAs then price
+  for (let v=Math.ceil(lo/gs)*gs; v<=hi; v+=gs){ const y=Math.round(Y(v))+.5; g.beginPath(); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke(); g.fillText(fmtAxis(v), W-padR+6, y); }
+  // month ticks
+  g.textAlign = 'center';
+  let lastM = -1;
+  for (let k=start;k<N;k++){ const dt = new Date(t[k]*1000), m = dt.getMonth(); if (m !== lastM) { if (lastM !== -1 && (m % 3 === 0)) { const x = Math.round(X(k))+.5; g.strokeStyle = line; g.beginPath(); g.moveTo(x, topH-4); g.lineTo(x, topH); g.stroke(); g.fillStyle = muted; g.fillText(dt.toLocaleDateString('en-US',{month:'short'}) + (m===0?' '+String(dt.getFullYear()).slice(2):''), x, H-7); } lastM = m; } }
+  g.textAlign = 'left';
+  // candles
+  const up = cssVar('--up'), dn = cssVar('--down');
+  const bw = Math.max(1/dpr, step*0.62);
+  for (let k=start;k<N;k++){
+    const b = bar(k), x = X(k), isUp = b.c >= b.o, col = isUp ? up : dn;
+    g.strokeStyle = col; g.fillStyle = col; g.lineWidth = Math.max(1/dpr, Math.min(1, step*0.18));
+    g.beginPath(); g.moveTo(x, Y(b.h)); g.lineTo(x, Y(b.l)); g.stroke();
+    const y1 = Y(Math.max(b.o,b.c)), y2 = Y(Math.min(b.o,b.c));
+    g.fillRect(x-bw/2, y1, bw, Math.max(1/dpr, y2-y1));
+  }
+  // SMAs
   const colors = {s20:cssVar('--ma20'),s50:cssVar('--ma50'),s100:cssVar('--ma100'),s200:cssVar('--ma200')};
-  keys.slice().reverse().forEach(kk => path(S[kk], colors[kk], kk==='s200'?2:1.5));
-  path(c, cssVar('--price'), 2);
-  function path(arr, col, w){ g.beginPath(); let m=false; for(let k=start;k<c.length;k++){ const v=arr[k]; if(v==null){m=false;continue;} const x=X(k),y=Y(v); if(!m){g.moveTo(x,y);m=true;} else g.lineTo(x,y);} g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.stroke(); }
+  keys.slice().reverse().forEach(kk => { g.beginPath(); let m=false; for(let k=start;k<N;k++){ const v=S[kk][k]; if(v==null){m=false;continue;} const x=X(k),y=Y(v); if(!m){g.moveTo(x,y);m=true;} else g.lineTo(x,y);} g.strokeStyle=colors[kk]; g.lineWidth = kk==='s200'?2:1.4; g.lineJoin='round'; g.stroke(); });
   // last price tag
-  const ly = Y(c[c.length-1]); g.fillStyle = cssVar('--fg'); roundRect(g, W-padR+2, ly-9, padR-2, 18, 4); g.fill(); g.fillStyle = cssVar('--bg'); g.fillText(fmtAxis(c[c.length-1]), W-padR+6, ly);
-  // RSI panel
-  g.fillStyle = cssVar('--sunk'); g.fillRect(padL, RY(70), W-padL-padR, RY(30)-RY(70));
-  g.strokeStyle = line; [30,70].forEach(v=>{ const y=Math.round(RY(v))+.5; g.beginPath(); g.setLineDash([3,3]); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke(); g.setLineDash([]); g.fillStyle=muted; g.fillText(String(v), W-padR+6, y); });
+  const ly = Y(c[N-1]); g.fillStyle = cssVar('--fg'); roundRect(g, W-padR+2, ly-9, padR-2, 18, 4); g.fill(); g.fillStyle = cssVar('--bg'); g.fillText(fmtAxis(c[N-1]), W-padR+6, ly);
+  // RSI panel with the app's zones (40 / 75)
+  g.fillStyle = cssVar('--sunk'); g.fillRect(padL, RY(75), plotW, RY(40)-RY(75));
+  g.strokeStyle = line; [40,75].forEach(v=>{ const y=Math.round(RY(v))+.5; g.beginPath(); g.setLineDash([3,3]); g.moveTo(padL,y); g.lineTo(W-padR,y); g.stroke(); g.setLineDash([]); g.fillStyle=muted; g.fillText(String(v), W-padR+6, y); });
   g.fillStyle = muted; g.fillText('RSI', W-padR+6, RY(100)+4);
-  g.beginPath(); let m=false; for(let k=start;k<c.length;k++){ const v=S.rsi[k]; if(v==null) continue; const x=X(k),y=RY(v); if(!m){g.moveTo(x,y);m=true;} else g.lineTo(x,y); }
+  g.beginPath(); let m=false; for(let k=start;k<N;k++){ const v=S.rsi[k]; if(v==null) continue; const x=X(k),y=RY(v); if(!m){g.moveTo(x,y);m=true;} else g.lineTo(x,y); }
   g.strokeStyle = cssVar('--accent'); g.lineWidth = 1.5; g.stroke();
-  // date ends
-  const dfmt = k => new Date(t[k]*1000).toLocaleDateString([], {month:'short', year:'2-digit'});
-  g.fillStyle = muted; g.textAlign = 'left'; g.fillText(dfmt(start), padL, H-6); g.textAlign = 'right'; g.fillText(dfmt(c.length-1), W-padR, H-6); g.textAlign = 'left';
   // hover
-  let hk = c.length-1;
+  let hk = N-1;
   if (typeof hover === 'number') {
-    hk = Math.max(start, Math.min(c.length-1, Math.round(start + (hover-padL)/(W-padL-padR)*(n-1))));
+    hk = Math.max(start, Math.min(N-1, Math.floor(start + (hover-padL)/step)));
     const x = Math.round(X(hk))+.5;
-    g.strokeStyle = cssVar('--muted'); g.lineWidth = 1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,H-12); g.stroke();
-    g.fillStyle = cssVar('--fg'); g.beginPath(); g.arc(X(hk), Y(c[hk]), 3.5, 0, 7); g.fill();
+    g.strokeStyle = cssVar('--muted'); g.lineWidth = 1; g.beginPath(); g.moveTo(x,0); g.lineTo(x,H-16); g.stroke();
     if (S.rsi[hk]!=null){ g.fillStyle = cssVar('--accent'); g.beginPath(); g.arc(X(hk), RY(S.rsi[hk]), 3, 0, 7); g.fill(); }
   }
-  chartGeom = {padL, padR, W};
-  const dt = new Date(t[hk]*1000).toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+  const b = bar(hk);
+  const dt = new Date(t[hk]*1000).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
   $('#legend').innerHTML = `<span class="d">${dt}${typeof hover==='number'?'':' · latest'}</span>
-    <span><i style="background:var(--price)"></i><b class="num">${fx(c[hk])}</b></span>
+    <span class="num">O ${fx(b.o)}</span><span class="num">H ${fx(b.h)}</span><span class="num">L ${fx(b.l)}</span><span class="num"><b>C ${fx(b.c)}</b></span>
     <span><i style="background:var(--ma20)"></i>20 <span class="num">${fx(S.s20[hk])}</span></span>
     <span><i style="background:var(--ma50)"></i>50 <span class="num">${fx(S.s50[hk])}</span></span>
     <span><i style="background:var(--ma100)"></i>100 <span class="num">${fx(S.s100[hk])}</span></span>
@@ -536,7 +710,61 @@ function niceStep(raw){ const p = Math.pow(10, Math.floor(Math.log10(raw))); con
 function fmtAxis(v){ return v>=1000 ? v.toFixed(0) : v>=100 ? v.toFixed(1) : v.toFixed(2); }
 function roundRect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 
-/* ---------- search / add ---------- */
+/* alerts (web push) */
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const isStandalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+function b64ToBytes(s){ const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from(b, ch => ch.charCodeAt(0)); }
+async function getSub(){ if (!pushSupported()) return null; const reg = await navigator.serviceWorker.ready; return reg.pushManager.getSubscription(); }
+async function post(action, body){ const r = await fetch(API + '?action=' + action, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}); const j = await r.json().catch(()=>({})); if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }
+async function syncAlerts(){
+  const ep = store.get('tc.push', null); if (!ep) return;
+  try { await post('sync', {endpoint: ep, symbols: watch, verdicts: currentVerdicts()}); } catch(e){}
+}
+async function renderAlerts(){
+  const b = $('#aBody');
+  const intro = `<div class="card"><p class="txt">TrendCheck checks your list every weekday after the market closes (about 4:20 PM ET). When a signal changes, for example <b>SCHD: Hold → Strong buy</b> or <b>NFLX: Watch → Avoid</b>, your iPhone gets a notification.</p>
+    <p class="note">In the backtest your list would produce about one new Strong buy a week and one new Avoid a month.</p></div>`;
+  if (!pushSupported() || (isIOS && !isStandalone())) {
+    b.innerHTML = intro + `<div class="card"><p class="sec-t">One step first</p>
+      <p class="txt">iPhone only allows notifications for apps on the Home Screen.</p>
+      <ol class="steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li>Open TrendCheck from the new icon and come back here.</li></ol></div>`;
+    return;
+  }
+  const sub = await getSub().catch(() => null);
+  const on = !!sub && Notification.permission === 'granted';
+  $('#bellOn').hidden = !on;
+  if (Notification.permission === 'denied') {
+    b.innerHTML = intro + `<div class="card"><div class="status"><i></i>Notifications are blocked</div><p class="note">Turn them on in Settings → Notifications → TrendCheck, then come back.</p></div>`;
+    return;
+  }
+  b.innerHTML = intro + `<div class="card" style="display:grid;gap:12px">
+      <div class="status ${on?'on':''}"><i></i>${on?'Alerts are on for this iPhone':'Alerts are off'}</div>
+      ${on ? `<button class="btn" type="button" id="aTest">Send a test notification</button><button class="btn danger" type="button" id="aOff">Turn off alerts</button>`
+           : `<button class="btn primary" type="button" id="aOn">Turn on alerts</button>`}
+      <p class="note" style="margin:0">Your watchlist (ticker symbols only) and this phone's notification address are stored so the daily check knows what to watch. Nothing else is collected.</p>
+    </div>`;
+}
+async function turnOn(){
+  try{
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { toast('Notifications were not allowed.'); return renderAlerts(); }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: b64ToBytes(VAPID) });
+    await post('subscribe', { subscription: sub.toJSON(), symbols: watch, verdicts: currentVerdicts() });
+    store.set('tc.push', sub.endpoint);
+    toast('Alerts are on. Sending a test…');
+    await post('test', { endpoint: sub.endpoint }).catch(()=>{});
+  }catch(e){ toast('Could not turn on alerts: ' + e.message); }
+  renderAlerts();
+}
+async function turnOff(){
+  try{ const sub = await getSub(); if (sub) { await post('unsubscribe', {endpoint: sub.endpoint}).catch(()=>{}); await sub.unsubscribe(); } }catch(e){}
+  try{ localStorage.removeItem('tc.push'); }catch(e){}
+  toast('Alerts are off.'); renderAlerts();
+}
+
+/* search / add */
 let sTimer, sSeq = 0;
 $('#addInput').addEventListener('input', e => {
   const q = e.target.value.trim(); clearTimeout(sTimer);
@@ -564,46 +792,55 @@ async function addTicker(sym){
   watch.unshift(sym); state[sym] = {status:'load'}; render();
   try{
     await fetchOne(sym, true);
-    store.set('tc.watch', watch); store.set('tc.cache', pruneCache());
-    render(); toast('Added ' + sym + ': ' + state[sym].a.label + '.');
+    store.set('tc.watch', watch); saveCache(); updateSeen();
+    render(); syncAlerts(); toast('Added ' + sym + ': ' + state[sym].a.label + '.');
   }catch(err){
     watch = watch.filter(x => x !== sym); delete state[sym]; render();
     toast(err.message || ('Could not find ' + sym + '.'));
   }
 }
 
-/* ---------- events ---------- */
+/* events */
 $('#rail').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; store.set('tc.filter', filter); render(); });
 $('#sort').value = sortBy;
 $('#sort').addEventListener('change', e => { sortBy = e.target.value; store.set('tc.sort', sortBy); render(); });
 $('#list').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (b) openDetail(b.dataset.s); });
+$('#changes').addEventListener('click', e => { if (e.target.id === 'gotIt') { seen = currentVerdicts(); store.set('tc.seen', seen); renderChanges(); } });
 $('#refresh').addEventListener('click', () => refreshAll(true));
-$('#dRefresh').addEventListener('click', async () => { const b=$('#dRefresh'); b.classList.add('spin'); try{ await fetchOne(openSym, true); store.set('tc.cache', pruneCache()); }catch(e){ toast(e.message); } b.classList.remove('spin'); render(); renderDetail(true); });
+$('#bell').addEventListener('click', () => { $('#alerts').classList.add('open'); history.pushState({a:1}, ''); renderAlerts(); });
+$('#aBody').addEventListener('click', e => {
+  if (e.target.id === 'aOn') turnOn();
+  else if (e.target.id === 'aOff') turnOff();
+  else if (e.target.id === 'aTest') { const ep = store.get('tc.push', null); getSub().then(s => post('test', {endpoint: (s && s.endpoint) || ep})).then(() => toast('Test sent. It should arrive in a few seconds.')).catch(err => toast(err.message)); }
+});
+$('#dRefresh').addEventListener('click', async () => { const b=$('#dRefresh'); b.classList.add('spin'); try{ await fetchOne(openSym, true); saveCache(); }catch(e){ toast(e.message); } b.classList.remove('spin'); render(); renderDetail(true); });
 $('#helpBtn').addEventListener('click', () => { $('#help').classList.add('open'); history.pushState({h:1}, ''); });
 $('#resetBtn').addEventListener('click', () => { watch = DEFAULTS.slice(); store.set('tc.watch', watch); watch.forEach(hydrate); render(); refreshAll(false); toast('Original 19 tickers restored.'); });
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => history.back()));
 window.addEventListener('popstate', closeSheets);
 $('#dBody').addEventListener('click', e => {
-  const r = e.target.closest('[data-r]');
-  if (r) { range = +r.dataset.r; store.set('tc.range', range); document.querySelectorAll('#ranges button').forEach(b => b.setAttribute('aria-pressed', b===r)); drawChart(); return; }
-  if (e.target.id === 'rmBtn') { $('#rmWrap').innerHTML = `<div class="confirm"><button type="button" id="rmNo">Keep</button><button type="button" class="yes" id="rmYes">Remove ${esc(openSym)}</button></div>`; return; }
-  if (e.target.id === 'rmNo') { $('#rmWrap').innerHTML = `<button class="danger" type="button" id="rmBtn">Remove from watchlist</button>`; return; }
-  if (e.target.id === 'rmYes') { const s = openSym; watch = watch.filter(x => x !== s); delete state[s]; store.set('tc.watch', watch); store.set('tc.cache', pruneCache()); history.back(); render(); toast('Removed ' + s + '.'); }
+  if (e.target.id === 'rmBtn') { $('#rmWrap').innerHTML = `<div class="confirm"><button class="btn" type="button" id="rmNo">Keep</button><button type="button" class="btn yes" id="rmYes">Remove ${esc(openSym)}</button></div>`; return; }
+  if (e.target.id === 'rmNo') { $('#rmWrap').innerHTML = `<button class="btn danger" type="button" id="rmBtn">Remove from watchlist</button>`; return; }
+  if (e.target.id === 'rmYes') { const s = openSym; watch = watch.filter(x => x !== s); delete state[s]; store.set('tc.watch', watch); saveCache(); if (seen) { delete seen[s]; store.set('tc.seen', seen); } history.back(); render(); syncAlerts(); toast('Removed ' + s + '.'); }
 });
-// chart scrub
 function scrub(e){ const cv = $('#chart'); if (!cv) return; const r = cv.getBoundingClientRect(); drawChart(e.clientX - r.left); }
 $('#dBody').addEventListener('pointerdown', e => { if (e.target.id === 'chart') scrub(e); });
 $('#dBody').addEventListener('pointermove', e => { if (e.target.id === 'chart' && (e.pointerType==='mouse' || e.buttons)) scrub(e); });
 $('#dBody').addEventListener('pointerleave', e => { if (e.target.id === 'chart') drawChart(); }, true);
-$('#dBody').addEventListener('pointerup', e => { if (e.target.id === 'chart' && e.pointerType!=='mouse') setTimeout(()=>drawChart(), 1200); });
+$('#dBody').addEventListener('pointerup', e => { if (e.target.id === 'chart' && e.pointerType!=='mouse') setTimeout(()=>drawChart(), 1500); });
 window.addEventListener('resize', () => drawChart());
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => drawChart());
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAll(false); });
 setInterval(() => { if (!document.hidden) render(); }, 60000);
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'refresh') refreshAll(true); });
+}
 
+updateSeen();
 render();
 refreshAll(false);
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+getSub().then(s => { $('#bellOn').hidden = !(s && Notification.permission === 'granted'); }).catch(()=>{});
 })();
 </script>
 </body>
