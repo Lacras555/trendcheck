@@ -723,7 +723,7 @@ async function syncAlerts(){
 }
 async function renderAlerts(){
   const b = $('#aBody');
-  const intro = `<div class="card"><p class="txt">TrendCheck checks your list every weekday after the market closes (about 4:20 PM ET). When a signal changes, for example <b>SCHD: Hold → Strong buy</b> or <b>NFLX: Watch → Avoid</b>, your iPhone gets a notification.</p>
+  const intro = `<div class="card"><p class="txt">TrendCheck checks your list every weekday after the market closes (5:20 PM ET now, 4:20 PM ET after clocks change in November). When a signal changes, for example <b>SCHD: Hold → Strong buy</b> or <b>NFLX: Watch → Avoid</b>, your iPhone gets a notification.</p>
     <p class="note">In the backtest your list would produce about one new Strong buy a week and one new Avoid a month.</p></div>`;
   if (!pushSupported() || (isIOS && !isStandalone())) {
     b.innerHTML = intro + `<div class="card"><p class="sec-t">One step first</p>
